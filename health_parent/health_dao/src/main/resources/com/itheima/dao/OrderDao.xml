@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.OrderDao" >
+    <resultMap id="baseResultMap" type="com.itheima.pojo.Order">
+        <id column="id" property="id"/>
+        <result column="member_id" property="memberId"/>
+        <result column="orderDate" property="orderDate"/>
+        <result column="orderType" property="orderType"/>
+        <result column="orderStatus" property="orderStatus"/>
+        <result column="package_id" property="packageId"/>
+    </resultMap>
+    <!--新增-->
+    <insert id="add" parameterType="com.itheima.pojo.Order">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into t_order(member_id,orderDate,orderType,orderStatus,package_id)
+        values (#{memberId},#{orderDate},#{orderType},#{orderStatus},#{packageId})
+    </insert>
+
+    <!--动态条件查询-->
+    <select id="findByCondition" parameterType="com.itheima.pojo.Order" resultMap="baseResultMap">
+        select * from t_order
+        <where>
+            <if test="id != null">
+                and id = #{id}
+            </if>
+            <if test="memberId != null">
+                and member_id = #{memberId}
+            </if>
+            <if test="orderDate != null">
+                and orderDate = #{orderDate}
+            </if>
+            <if test="orderType != null">
+                and orderType = #{orderType}
+            </if>
+            <if test="orderStatus != null">
+                and orderStatus = #{orderStatus}
+            </if>
+            <if test="packageId != null">
+                and package_id = #{packageId}
+            </if>
+        </where>
+    </select>
+
+    <!--根据预约id查询预约信息，包括体检人信息、套餐信息-->
+    <select id="findById4Detail" parameterType="int" resultType="map">
+        select m.name member ,s.name package,o.orderDate orderDate,o.orderType orderType
+        from
+          t_order o,
+          t_member m,
+          t_package s
+        where o.member_id=m.id and o.package_id=s.id and o.id=#{id}
+    </select>
+
+    <!--根据日期统计预约数-->
+    <select id="findOrderCountByDate" parameterType="string" resultType="int">
+        select count(id) from t_order where orderDate = #{value}
+    </select>
+
+    <!--根据日期统计预约数，统计指定日期之后的预约数-->
+    <select id="findOrderCountAfterDate" parameterType="string" resultType="int">
+        select count(id) from t_order where orderDate &gt;= #{value}
+    </select>
+    <!--根据日期范围统计预约数-->
+    <select id="findOrderCountBetweenDate" parameterType="String" resultType="int">
+    select count(id) from t_order where orderDate between #{startDate} and #{endDate}
+    </select>
+
+    <!--根据日期统计到诊数-->
+    <select id="findVisitsCountByDate" parameterType="string" resultType="int">
+        select count(id) from t_order where orderDate = #{value} and orderStatus = '已到诊'
+    </select>
+
+    <!--根据日期统计到诊数，统计指定日期之后的到诊数-->
+    <select id="findVisitsCountAfterDate" parameterType="string" resultType="int">
+        select count(id) from t_order where orderDate &gt;= #{value} and orderStatus = '已到诊'
+    </select>
+
+    <!--热门套餐，查询前5条-->
+    <select id="findHotPackage" resultType="map">
+       SELECT
+       p.name ,
+       COUNT(1) count,
+       COUNT(1)/t.total proportion,
+        remark
+       FROM t_order o,t_package p,
+       (SELECT COUNT(1) total FROM t_order) t
+       WHERE o.`package_id`=p.`id`
+      GROUP BY package_id ORDER BY proportion DESC LIMIT 0,4
+    </select>
+
+    <select id="findById" parameterType="int" resultType="map">
+      select
+            m.name as member,
+            p.name as package,
+            o.orderDate,
+            o.orderType
+        From
+        t_package p, t_member m, t_order o
+        where o.member_id = m.id and o.package_id=p.id
+        and o.id=#{id}
+    </select>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.CheckItemDao">
+    <insert id="add" parameterType="CheckItem">
+        insert into t_checkitem (code,name,sex,age,price,type,remark,attention)
+        values(#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+
+    <select id="findAllByCondition" resultType="CheckItem" parameterType="String">
+        select * from t_checkitem
+        <if test="value != null and value.length > 0">
+            where code like #{value} or name like #{value}
+        </if>
+    </select>
+
+    <select id="findCountByCheckItemId" parameterType="int" resultType="int">
+        select count(1) from t_checkgroup_checkitem where checkitem_id=#{value}
+    </select>
+
+    <delete id="deleteById" parameterType="int">
+        delete from t_checkitem where id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="int" resultType="CheckItem">
+        select * from t_checkitem where id=#{id}
+    </select>
+
+    <update id="update" parameterType="checkitem">
+        update t_checkitem
+        <set>
+            code=#{code},
+            name=#{name},
+            sex=#{sex},
+            age=#{age},
+            price=#{price},
+            type=#{type},
+            remark=#{remark},
+            attention=#{attention}
+        </set>
+        where id=#{id}
+    </update>
+
+    <select id="findAll" resultType="CheckItem">
+        select * from t_checkitem
+    </select>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.dao.CheckGroupDao">
+    <insert id="add" parameterType="CheckGroup">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into t_checkgroup(code,name,helpCode,sex,remark,attention)
+        values(#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+    </insert>
+
+    <insert id="addCheckGroupCheckItem" parameterType="int">
+        insert into t_checkgroup_checkitem
+        values (#{checkGroupId},#{checkitemid})
+    </insert>
+
+    <select id="findByCondition" parameterType="String" resultType="CheckGroup">
+        select * From t_checkgroup
+        <if test="value != null and value.length > 0">
+            where code like #{value} or name like #{value} or helpCode like #{value}
+        </if>
+    </select>
+
+    <select id="findCheckItemIdsById" parameterType="int" resultType="int">
+        select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id}
+    </select>
+
+    <select id="findById" parameterType="int" resultType="CheckGroup">
+        select * From t_checkgroup where id=#{id}
+    </select>
+
+    <update id="update" parameterType="CheckGroup">
+        update t_checkgroup
+        <set>
+            code=#{code},
+            name=#{name},
+            helpCode=#{helpCode},
+            sex=#{sex},
+            remark=#{remark},
+            attention=#{attention}
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteCheckItemById" parameterType="int">
+        delete from t_checkgroup_checkitem where checkgroup_id=#{checkGroupId}
+    </delete>
+
+    <select id="findAll" resultType="CheckGroup">
+        select * from t_checkgroup
+    </select>
+</mapper>
